@@ -2,6 +2,7 @@ const express = require("express"),
   fs = require("fs"),
   path = require("path"),
   http = require("http"),
+  cors = require("cors"),
   https = require("https"),
   app = express(),
   options = {
@@ -9,15 +10,29 @@ const express = require("express"),
     cert: fs.readFileSync("./cert/certificate.pem", { encoding: "utf-8" }),
   };
 
+function isSecure(req) {
+  if (req.headers["x-forwarded-proto"]) {
+    return req.headers["x-forwarded-proto"] === "https";
+  }
+  return req.secure;
+}
+
+app.use(cors());
+
+// redirect any page form http to https
+app.use((req, res, next) => {
+  if (!isSecure(req)) {
+    res.redirect(301, `https://${req.headers.host}${req.url}`);
+  } else {
+    next();
+  }
+});
+
 app.use(express.static(path.join(__dirname, "build")));
 
 const httpServer = http.createServer(app);
 const httpsServer = https.createServer(options, app);
 
-app.get("*", (req, res) => {
-  res.redirect("https://" + req.headers.host + req.url);
-});
-
-httpServer.listen(3001);
-httpsServer.listen(3000);
-console.log("Server listining on port [3000]");
+httpServer.listen(80);
+httpsServer.listen(443);
+console.log("Server listining on port [443]");
