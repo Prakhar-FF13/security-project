@@ -8,7 +8,8 @@ const express = require("express"),
   options = {
     key: fs.readFileSync("./cert/key.pem", { encoding: "utf-8" }),
     cert: fs.readFileSync("./cert/certificate.pem", { encoding: "utf-8" }),
-  };
+  },
+  mongoDB = require("./database");
 
 function isSecure(req) {
   if (req.headers["x-forwarded-proto"]) {
@@ -29,6 +30,12 @@ app.use((req, res, next) => {
 });
 
 app.use(express.static(path.join(__dirname, "build")));
+
+app.get("/loginData", async (req, res) => {
+  const usersCursor = mongoDB.users.find();
+  await usersCursor.forEach(console.dir);
+  return res.send("Helo");
+});
 
 const httpServer = http.createServer(app);
 const httpsServer = https.createServer(options, app);
