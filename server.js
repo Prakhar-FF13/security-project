@@ -48,6 +48,16 @@ app.post(
   }
 );
 
+app.post(
+  "/upload_files",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    return res.json({
+      msg: "Hello",
+    });
+  }
+);
+
 app.post("/register", (req, res) => {
   const saltHash = utils.genPassword(req.body.password),
     salt = saltHash.salt,
@@ -64,12 +74,11 @@ app.post("/register", (req, res) => {
       if (err) {
         return res.json(err);
       }
-      const jwt = utils.issueJWT(result);
+      const jwt = utils.issueJWT({ _id: result.insertedId.toString() });
       return res.json({
         success: true,
         token: jwt.token,
         expiresIn: jwt.expires,
-        user: result,
       });
     }
   );
@@ -103,7 +112,6 @@ app.post("/login", (req, res) => {
         success: true,
         token,
         expiresIn: token.expires,
-        user: user,
       });
     }
 
