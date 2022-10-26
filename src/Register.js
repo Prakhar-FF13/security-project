@@ -6,6 +6,7 @@ const RegisterForm = () => {
     type: "user",
     username: "",
     password: "",
+    kind: "patient",
   });
 
   const onChange = (e) => {
@@ -18,20 +19,23 @@ const RegisterForm = () => {
     e.preventDefault();
     try {
       const formData = new FormData();
-      for (let i = 0; i < state.file.length; i++) {
-        formData.append("file", state.file[i]);
-      }
+      if (state.file)
+        for (let i = 0; i < state.file.length; i++) {
+          formData.append("file", state.file[i]);
+        }
 
       const res = await axios.post("/register", {
         ...state,
       });
 
-      await axios.post("/upload_files", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: res.data.token,
-        },
-      });
+      console.log(res);
+      if (state.file)
+        await axios.post("/upload_files", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: res.data.token,
+          },
+        });
     } catch (e) {
       console.log(e);
     }
@@ -51,6 +55,28 @@ const RegisterForm = () => {
         <option value="user">User</option>
         <option value="organisation">Organisation</option>
       </select>
+
+      {state.type && state.type === "user" ? (
+        <>
+          <label htmlFor="kind">Kind</label>
+          <select id="kind" name="kind" onChange={onChange} value={state.value}>
+            <option value="patient">Patient</option>
+            <option value="healthCareProfessional">
+              Health Care Professional
+            </option>
+          </select>
+        </>
+      ) : (
+        <>
+          <label htmlFor="kind">Kind</label>
+          <select id="kind" name="kind" onChange={onChange} value={state.value}>
+            <option value="hospital">Hospital</option>
+            <option value="pharmacy">Pharmacy</option>
+            <option value="insuranceFirm">Insurance Firm</option>
+          </select>
+        </>
+      )}
+
       <label htmlFor="username">Username:</label>
       <input
         type="text"
@@ -59,6 +85,7 @@ const RegisterForm = () => {
         onChange={onChange}
         value={state.username}
       />
+
       <label htmlFor="password">Password:</label>
       <input
         type="password"
@@ -67,6 +94,7 @@ const RegisterForm = () => {
         onChange={onChange}
         value={state.password}
       />
+
       {state && state.type === "organisation" ? (
         <>
           <label htmlFor="file">Files: </label>

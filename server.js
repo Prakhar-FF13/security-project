@@ -60,6 +60,14 @@ app.post(
   }
 );
 
+app.get(
+  "/fetch_files/:name",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    return mongoDB.download(req, res);
+  }
+);
+
 // fetch all files from mongoDB.
 app.get(
   "/fetch_files",
@@ -81,6 +89,7 @@ app.post("/register", (req, res) => {
       type: req.body.type,
       hash,
       salt,
+      kind: req.body.kind,
     },
     (err, result) => {
       if (err) {
