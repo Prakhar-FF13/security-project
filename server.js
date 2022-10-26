@@ -51,12 +51,15 @@ app.post(
 app.post(
   "/upload_files",
   passport.authenticate("jwt", { session: false }),
-  (req, res) => {
-    return res.json({
-      msg: "Hello",
-    });
+  async (req, res) => {
+    console.log(req.files);
+    return mongoDB.upload(req, res);
   }
 );
+
+app.get("/fetch_files", async (req, res) => {
+  return mongoDB.getListFiles(req, res);
+});
 
 app.post("/register", (req, res) => {
   const saltHash = utils.genPassword(req.body.password),

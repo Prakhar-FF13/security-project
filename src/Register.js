@@ -18,31 +18,20 @@ const RegisterForm = () => {
     e.preventDefault();
     try {
       const formData = new FormData();
-      if (state.file) {
-        for (let i = 0; i < state.file.length; i++) {
-          formData.append(`file${i}`, state.file[i]);
-        }
+      for (let i = 0; i < state.file.length; i++) {
+        formData.append("file", state.file[i]);
       }
 
       const res = await axios.post("/register", {
         ...state,
       });
 
-      console.log(res.data.token);
-
-      await axios.post(
-        "/upload_files",
-        {
-          formData,
+      await axios.post("/upload_files", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: res.data.token,
         },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: res.data.token,
-          },
-        }
-      );
-      console.log(res);
+      });
     } catch (e) {
       console.log(e);
     }
@@ -53,6 +42,8 @@ const RegisterForm = () => {
       onSubmit={(e) => {
         handleSubmit(e);
       }}
+      method="POST"
+      action="upload_files"
       encType="multipart/form-data"
     >
       <label htmlFor="type">Type</label>
