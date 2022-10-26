@@ -1,12 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import Container from "./Container";
 
-const Context = React.createContext({});
+const Context = React.createContext();
 
 export default function App() {
+  const [user, setUser] = useState({});
   return (
     <>
-      <Context.Provider value={{}}>
+      <Context.Provider value={[user, setUser]}>
         <Container />
       </Context.Provider>
     </>

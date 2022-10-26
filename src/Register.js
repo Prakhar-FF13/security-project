@@ -29,7 +29,6 @@ const RegisterForm = () => {
         ...state,
       });
 
-      console.log(res);
       if (state.file)
         await axios.post("/upload_files", formData, {
           headers: {

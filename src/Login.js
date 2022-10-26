@@ -1,7 +1,10 @@
-import React from "react";
+import axios from "axios";
+import React, { useContext } from "react";
 import "./Login.css";
+import { UserContext } from "./App";
 
 export default function LoginForm() {
+  const [, setUser] = useContext(UserContext);
   const [state, setState] = React.useState({
     type: "user",
     username: "",
@@ -13,10 +16,28 @@ export default function LoginForm() {
     setState({ ...state, [e.target.name]: e.target.value });
   };
 
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    const res = await axios.post("/login", {
+      username: state.username,
+      password: state.password,
+    });
+
+    if (res && res.data && res.data.user) {
+      delete res.data.user.salt;
+      delete res.data.user.hash;
+    }
+
+    setUser({
+      token: res.data.token,
+      ...res.user,
+    });
+  };
+
   return (
     <>
       <h2>Login</h2>
-      <form id="logForm" method="POST">
+      <form id="logForm" method="POST" onSubmit={onSubmit}>
         <label htmlFor="type">Type</label>
         <select id="type" name="type" onChange={onChange} value={state.value}>
           <option value="user">User</option>
@@ -53,20 +74,22 @@ export default function LoginForm() {
             </select>
           </>
         )}
-        <label htmlFor="username">Username</label>
+        <label htmlFor="username">Username:</label>
         <input
           type="text"
           name="username"
           value={state.username}
           onChange={onChange}
         />
-        <label htmlFor="password">Password</label>
+        <label htmlFor="password">Password:</label>
         <input
           type="password"
+          id="password"
           name="password"
+          onChange={onChange}
           value={state.password}
-          onChage={onChange}
         />
+        <input type="submit" value="submit" />
       </form>
     </>
   );
