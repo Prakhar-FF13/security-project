@@ -134,6 +134,7 @@ app.post("/login", (req, res) => {
         success: true,
         token,
         expiresIn: token.expires,
+        user,
       });
     }
 

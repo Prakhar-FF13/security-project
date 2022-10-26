@@ -8,5 +8,5 @@
    1. A collection named users.
    2. create a user and add to the uri user details.
 6. run npm install to install the packages.
-7. run npm build to build the react production bundle.
+7. run npm run build to build the react production bundle.
 8. run node server.js to start the server. 
