@@ -9,15 +9,18 @@ export default function Profile({ setPage }) {
     setPage(1);
     return <></>;
   } else {
-    const handleDownload = async (id) => {
-      const res = await axios.get(`/fetch_files/${id}`, {
+    const handleDownload = async (file) => {
+      console.log(file);
+      const res = await axios.get(`/fetch_files/${file.id}`, {
         headers: {
           Authorization: user.token.token,
         },
         responseType: "blob",
+        params: {
+          type: file.mimetype,
+        },
       });
-      console.log(res);
-      FileSaver.saveAs(res.data, id);
+      FileSaver.saveAs(res.data, file.filename);
     };
 
     return (
@@ -41,15 +44,13 @@ export default function Profile({ setPage }) {
               {file.id}
               <h4>File Type</h4>
               {file.contentType}
-              {file.contentType.split("/")[0] === "image" && (
-                <button
-                  onClick={() => {
-                    handleDownload(file.id);
-                  }}
-                >
-                  Download
-                </button>
-              )}
+              <button
+                onClick={() => {
+                  handleDownload(file);
+                }}
+              >
+                Download
+              </button>
             </>
           );
         })}

@@ -36,6 +36,7 @@ const mongodb = require("mongodb"),
                   contentType: req.files[i].contentType,
                   id: req.files[i].id.toString(),
                   filename: req.files[i].filename,
+                  mimetype: req.files[i].mimetype,
                 },
               },
             }
@@ -90,7 +91,7 @@ const mongodb = require("mongodb"),
 
         res.set({
           "Content-Disposition": 'attachment; filename="' + req.params.id + '"',
-          "Content-Type": "image/png",
+          "Content-Type": req.params.type,
         });
 
         downloadStream.on("data", function (data) {
