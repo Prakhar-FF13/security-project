@@ -2,14 +2,16 @@ import React from "react";
 import RegisterForm from "./Register";
 import { UserContext } from "./App";
 import Navbar from "./Navbar";
+import LoginForm from "./Login";
 
 export default function Container() {
   const user = React.useContext(UserContext);
-  console.log(user);
+  const [page, setPage] = React.useState(0);
   return (
     <>
-      <Navbar />
-      <RegisterForm />
+      <Navbar setPage={setPage} />
+      {page === 0 && <RegisterForm />}
+      {page === 1 && <LoginForm />}
     </>
   );
 }
