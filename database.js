@@ -1,5 +1,6 @@
 require("dotenv").config();
 const mongodb = require("mongodb"),
+  Grid = require("gridfs-stream"),
   util = require("util"),
   uri = process.env.MONGODB_URI,
   client = new mongodb.MongoClient(uri),
@@ -31,7 +32,11 @@ const mongodb = require("mongodb"),
             { _id: req.user._id },
             {
               $push: {
-                files: req.files[i].filename,
+                files: {
+                  contentType: req.files[i].contentType,
+                  id: req.files[i].id.toString(),
+                  filename: req.files[i].filename,
+                },
               },
             }
           );
@@ -79,16 +84,21 @@ const mongodb = require("mongodb"),
     },
     download = async (req, res) => {
       try {
-        let downloadStream = uploads.openDownloadStreamByName(req.params.name);
+        let downloadStream = uploads.openDownloadStream(
+          new mongodb.ObjectId(req.params.id)
+        );
+
+        res.set({
+          "Content-Disposition": 'attachment; filename="' + req.params.id + '"',
+          "Content-Type": "image/png",
+        });
 
         downloadStream.on("data", function (data) {
           return res.status(200).write(data);
         });
-
         downloadStream.on("error", function (err) {
           return res.status(404).send({ message: "Cannot download the file!" });
         });
-
         downloadStream.on("end", () => {
           return res.end();
         });

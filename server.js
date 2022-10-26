@@ -56,15 +56,15 @@ app.post(
   "/upload_files",
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
-    return mongoDB.upload(req, res);
+    return await mongoDB.upload(req, res);
   }
 );
 
 app.get(
-  "/fetch_files/:name",
+  "/fetch_files/:id",
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
-    return mongoDB.download(req, res);
+    return await mongoDB.download(req, res);
   }
 );
 
@@ -73,7 +73,7 @@ app.get(
   "/fetch_files",
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
-    return mongoDB.getListFiles(req, res);
+    return await mongoDB.getListFiles(req, res);
   }
 );
 
@@ -91,6 +91,7 @@ app.post("/register", (req, res) => {
       salt,
       kind: req.body.kind,
       verified: false,
+      files: [],
     },
     (err, result) => {
       if (err) {
