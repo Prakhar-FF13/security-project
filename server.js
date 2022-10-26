@@ -15,6 +15,7 @@ const express = require("express"),
 
 require("./passport")(passport);
 
+// check if https connection is made or not.
 function isSecure(req) {
   if (req.headers["x-forwarded-proto"]) {
     return req.headers["x-forwarded-proto"] === "https";
@@ -35,8 +36,10 @@ app.use((req, res, next) => {
   }
 });
 
+// front end files.
 app.use(express.static(path.join(__dirname, "build")));
 
+// testing purproses api.
 app.post(
   "/protected",
   passport.authenticate("jwt", { session: false }),
@@ -48,19 +51,25 @@ app.post(
   }
 );
 
+// upload files into mongoDB.
 app.post(
   "/upload_files",
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
-    console.log(req.files);
     return mongoDB.upload(req, res);
   }
 );
 
-app.get("/fetch_files", async (req, res) => {
-  return mongoDB.getListFiles(req, res);
-});
+// fetch all files from mongoDB.
+app.get(
+  "/fetch_files",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    return mongoDB.getListFiles(req, res);
+  }
+);
 
+// register user.
 app.post("/register", (req, res) => {
   const saltHash = utils.genPassword(req.body.password),
     salt = saltHash.salt,
@@ -87,6 +96,7 @@ app.post("/register", (req, res) => {
   );
 });
 
+// login user.
 app.post("/login", (req, res) => {
   mongoDB.users.findOne({ username: req.body.username }, function (err, user) {
     if (err) {

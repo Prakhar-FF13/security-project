@@ -26,6 +26,17 @@ const mongodb = require("mongodb"),
     upload = async (req, res) => {
       try {
         await uploadFilesMiddleware(req, res);
+        for (let i = 0; i < req.files.length; i++) {
+          await users.findOneAndUpdate(
+            { _id: req.user._id },
+            {
+              $push: {
+                files: req.files[i].filename,
+              },
+            }
+          );
+        }
+
         return res.send({
           message: "File has been uploaded.",
         });
@@ -39,8 +50,11 @@ const mongodb = require("mongodb"),
     getListFiles = async (req, res) => {
       try {
         const data = database.collection("uploads.files");
-
-        const cursor = data.find({});
+        const cursor = data.find({
+          filename: {
+            $in: req.user.files,
+          },
+        });
 
         if ((await cursor.count()) === 0) {
           return res.status(500).send({
