@@ -1,6 +1,5 @@
 require("dotenv").config();
 const mongodb = require("mongodb"),
-  Grid = require("gridfs-stream"),
   util = require("util"),
   uri = process.env.MONGODB_URI,
   client = new mongodb.MongoClient(uri),
