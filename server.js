@@ -90,6 +90,7 @@ app.post("/register", (req, res) => {
       hash,
       salt,
       kind: req.body.kind,
+      verified: false,
     },
     (err, result) => {
       if (err) {

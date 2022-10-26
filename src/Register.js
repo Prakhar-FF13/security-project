@@ -64,6 +64,7 @@ const RegisterForm = () => {
             <option value="healthCareProfessional">
               Health Care Professional
             </option>
+            <option value="admin">Admin</option>
           </select>
         </>
       ) : (

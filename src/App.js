@@ -1,6 +1,16 @@
 import React from "react";
-import RegisterForm from "./Register";
+import Container from "./Container";
+
+const Context = React.createContext({});
 
 export default function App() {
-  return <RegisterForm />;
+  return (
+    <>
+      <Context.Provider value={{}}>
+        <Container />
+      </Context.Provider>
+    </>
+  );
 }
+
+export const UserContext = Context;
