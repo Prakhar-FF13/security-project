@@ -30,7 +30,7 @@ export default function LoginForm() {
 
     setUser({
       token: res.data.token,
-      ...res.user,
+      ...res.data.user,
     });
   };
 
