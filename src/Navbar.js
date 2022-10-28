@@ -6,6 +6,7 @@ export default function Navbar({ setPage }) {
       <button onClick={() => setPage(0)}>Register</button>
       <button onClick={() => setPage(1)}>Login</button>
       <button onClick={() => setPage(2)}>Profile</button>
+      <button onClick={() => setPage(3)}>Dashboard</button>
     </div>
   );
 }

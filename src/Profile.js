@@ -10,7 +10,6 @@ export default function Profile({ setPage }) {
     return <></>;
   } else {
     const handleDownload = async (file) => {
-      console.log(file);
       const res = await axios.get(`/fetch_files/${file.id}`, {
         headers: {
           Authorization: user.token.token,

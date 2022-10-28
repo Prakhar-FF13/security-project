@@ -191,6 +191,11 @@ app.post("/login", (req, res) => {
       user.salt
     );
 
+    delete user.hash;
+    delete user.salt;
+    delete user.pubKey;
+    delete user.privKeyEnc;
+
     if (isValid) {
       const token = utils.issueJWT(user);
       return res.status(200).json({

@@ -33,6 +33,7 @@ const mongodb = require("mongodb"),
             filename: req.files[i].filename,
             mimetype: req.files[i].mimetype,
             origin: req.fileOrigin,
+            owner: req.user._id.toString(),
           };
           await users.findOneAndUpdate(
             { _id: req.user._id },
