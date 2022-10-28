@@ -4,6 +4,7 @@ const express = require("express"),
   http = require("http"),
   cors = require("cors"),
   https = require("https"),
+  crypto = require("crypto"),
   app = express(),
   options = {
     key: fs.readFileSync("./cert/key.pem", { encoding: "utf-8" }),
@@ -14,6 +15,60 @@ const express = require("express"),
   utils = require("./utils");
 
 require("./passport")(passport);
+
+/**************************************
+ * Pub/priv key for user to generate digital signature.
+ **************************************/
+
+function genKeyPairU() {
+  // Generates an object where the keys are stored in properties `privateKey` and `publicKey`
+  const keyPair = crypto.generateKeyPairSync("rsa", {
+    modulusLength: 4096, // bits - standard for RSA keys
+    publicKeyEncoding: {
+      type: "pkcs1", // "Public Key Cryptography Standards 1"
+      format: "pem", // Most common formatting choice
+    },
+    privateKeyEncoding: {
+      type: "pkcs1", // "Public Key Cryptography Standards 1"
+      format: "pem", // Most common formatting choice
+    },
+  });
+
+  return { publicKey: keyPair.publicKey, privateKey: keyPair.privateKey };
+}
+
+/**************************************
+ * Symmetric key algorithm below.
+ **************************************/
+
+const algorithm = "aes-256-cbc";
+const IV_LENGTH = 16;
+
+const symmetricEncrypt = (text) => {
+  const key = fs.readFileSync("./cryptography/id_sym_key.pem", {
+    encoding: "utf-8",
+  });
+  const iv = crypto.randomBytes(IV_LENGTH);
+  const cipher = crypto.createCipheriv(algorithm, Buffer.from(key, "hex"), iv);
+  let encrypted = cipher.update(text);
+  encrypted = Buffer.concat([encrypted, cipher.final()]);
+  return `${iv.toString("hex")}:${encrypted.toString("hex")}`;
+};
+
+const symmetricDecrypt = (text) => {
+  const key = fs.readFileSync("./cryptography/id_sym_key.pem");
+  const [iv, encryptedText] = text
+    .split(":")
+    .map((part) => Buffer.from(part, "hex"));
+  const decipher = crypto.createDecipheriv(
+    algorithm,
+    Buffer.from(key, "hex"),
+    iv
+  );
+  let decrypted = decipher.update(encryptedText);
+  decrypted = Buffer.concat([decrypted, decipher.final()]);
+  return decrypted.toString();
+};
 
 // check if https connection is made or not.
 function isSecure(req) {
@@ -56,6 +111,7 @@ app.post(
   "/upload_files",
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
+    req.fileOrigin = "upload";
     return await mongoDB.upload(req, res);
   }
 );
@@ -81,7 +137,10 @@ app.get(
 app.post("/register", (req, res) => {
   const saltHash = utils.genPassword(req.body.password),
     salt = saltHash.salt,
-    hash = saltHash.hash;
+    hash = saltHash.hash,
+    keyPairU = genKeyPairU(),
+    pubKeyU = keyPairU.publicKey,
+    privKeyUEnc = symmetricEncrypt(keyPairU.privateKey);
 
   mongoDB.users.insertOne(
     {
@@ -92,6 +151,8 @@ app.post("/register", (req, res) => {
       kind: req.body.kind,
       verified: false,
       files: [],
+      pubKey: pubKeyU,
+      privKeyEnc: privKeyUEnc,
     },
     (err, result) => {
       if (err) {

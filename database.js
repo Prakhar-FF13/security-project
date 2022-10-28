@@ -27,15 +27,19 @@ const mongodb = require("mongodb"),
       try {
         await uploadFilesMiddleware(req, res);
         for (let i = 0; i < req.files.length; i++) {
+          const signatureData = {
+            contentType: req.files[i].contentType,
+            id: req.files[i].id.toString(),
+            filename: req.files[i].filename,
+            mimetype: req.files[i].mimetype,
+            origin: req.fileOrigin,
+          };
           await users.findOneAndUpdate(
             { _id: req.user._id },
             {
               $push: {
                 files: {
-                  contentType: req.files[i].contentType,
-                  id: req.files[i].id.toString(),
-                  filename: req.files[i].filename,
-                  mimetype: req.files[i].mimetype,
+                  ...signatureData,
                 },
               },
             }

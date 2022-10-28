@@ -24,11 +24,14 @@ function genKeyPair() {
 }
 
 function genAndSaveKeyPair() {
-  const keyPair = genKeyPair();
+  const keyPair = genKeyPair(),
+    symmetricKey = crypto.randomBytes(256 / 8).toString("hex");
   fs.writeFileSync(__dirname + "/id_rsa_pub.pem", keyPair.publicKey);
 
   // Create the private key file
   fs.writeFileSync(__dirname + "/id_rsa_priv.pem", keyPair.privateKey);
+
+  fs.writeFileSync(__dirname + "/id_sym_key.pem", symmetricKey);
 }
 
 /*********************************************
@@ -114,17 +117,3 @@ module.exports.signMessage = signMessage;
 module.exports.verifyMessage = verifyMessage;
 
 genAndSaveKeyPair();
-
-// const keyPair = genKeyPair();
-// console.log(
-//   decryptWithPrivateKey(
-//     keyPair.privateKey,
-//     encryptWithPublicKey(keyPair.publicKey, "HelloThere")
-//   ).toString()
-// );
-
-// const packet = signMessage(keyPair.privateKey, {
-//   name: "Hello",
-// });
-
-// console.log(verifyMessage(keyPair.publicKey, packet));
