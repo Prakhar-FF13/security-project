@@ -73,7 +73,7 @@ function decryptWithPrivateKey(privateKey, message) {
  */
 function signMessage(privateKey, jsonMessage) {
   const message = JSON.stringify(jsonMessage);
-
+  const sha256 = crypto.createHash("sha256");
   sha256.update(message);
   const hashedData = sha256.digest("hex");
 
