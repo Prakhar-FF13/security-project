@@ -55,21 +55,6 @@ const symmetricEncrypt = (text) => {
   return `${iv.toString("hex")}:${encrypted.toString("hex")}`;
 };
 
-const symmetricDecrypt = (text) => {
-  const key = fs.readFileSync("./cryptography/id_sym_key.pem");
-  const [iv, encryptedText] = text
-    .split(":")
-    .map((part) => Buffer.from(part, "hex"));
-  const decipher = crypto.createDecipheriv(
-    algorithm,
-    Buffer.from(key, "hex"),
-    iv
-  );
-  let decrypted = decipher.update(encryptedText);
-  decrypted = Buffer.concat([decrypted, decipher.final()]);
-  return decrypted.toString();
-};
-
 // check if https connection is made or not.
 function isSecure(req) {
   if (req.headers["x-forwarded-proto"]) {

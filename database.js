@@ -4,7 +4,27 @@ const mongodb = require("mongodb"),
   uri = process.env.MONGODB_URI,
   client = new mongodb.MongoClient(uri),
   multer = require("multer"),
-  { GridFsStorage } = require("multer-gridfs-storage");
+  fs = require("fs"),
+  crypto = require("crypto"),
+  { GridFsStorage } = require("multer-gridfs-storage"),
+  algorithm = "aes-256-cbc",
+  symmetricDecrypt = (text) => {
+    const key = fs.readFileSync("./cryptography/id_sym_key.pem", {
+      encoding: "utf-8",
+    });
+    const [iv, encryptedText] = text
+      .split(":")
+      .map((part) => Buffer.from(part, "hex"));
+    const decipher = crypto.createDecipheriv(
+      algorithm,
+      Buffer.from(key, "hex"),
+      iv
+    );
+    let decrypted = decipher.update(encryptedText);
+    decrypted = Buffer.concat([decrypted, decipher.final()]);
+    return decrypted.toString();
+  },
+  { signMessage } = require("./cryptography/index");
 
 (async () => {
   await client.connect();
@@ -26,21 +46,22 @@ const mongodb = require("mongodb"),
     upload = async (req, res) => {
       try {
         await uploadFilesMiddleware(req, res);
+        const privKey = symmetricDecrypt(req.user.privKeyEnc);
         for (let i = 0; i < req.files.length; i++) {
           const signatureData = {
-            contentType: req.files[i].contentType,
-            id: req.files[i].id.toString(),
-            filename: req.files[i].filename,
-            mimetype: req.files[i].mimetype,
-            origin: req.fileOrigin,
-            owner: req.user._id.toString(),
-          };
+              id: req.files[i].id.toString(),
+              filename: req.files[i].filename,
+              mimetype: req.files[i].mimetype,
+              owner: req.user._id.toString(),
+            },
+            signature = signMessage(privKey, signatureData);
           await users.findOneAndUpdate(
             { _id: req.user._id },
             {
               $push: {
                 files: {
-                  ...signatureData,
+                  origin: req.fileOrigin,
+                  ...signature,
                 },
               },
             }

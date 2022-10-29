@@ -36,13 +36,14 @@ export default function Profile({ setPage }) {
           <h4>Kind:</h4>
           {user.kind}
         </div>
-        {user.files.map((file) => {
+        {user.files.map((obj) => {
+          const file = obj.payload;
           return (
             <>
               <h4>File Id:</h4>
               {file.id}
               <h4>File Type</h4>
-              {file.contentType}
+              {file.mimetype}
               <button
                 onClick={() => {
                   handleDownload(file);
