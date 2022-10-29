@@ -36,10 +36,23 @@ export default function Dashboard({ setPage }) {
       <>
         {user.receivedFrom &&
           user.receivedFrom.map((obj) => {
+            console.log(obj);
             return (
               <>
                 <p>File Id: {obj.payload.id}</p>
-                <p>Email of owner: {obj.payload.email}</p>
+                <p>Email of owner: {obj.email}</p>
+                <button
+                  onClick={async () => {
+                    const res = await axios.post("/verify_file", obj, {
+                      headers: {
+                        Authorization: user.token.token,
+                      },
+                    });
+                    console.log(res);
+                  }}
+                >
+                  Verify
+                </button>
               </>
             );
           })}

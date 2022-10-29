@@ -24,7 +24,7 @@ const mongodb = require("mongodb"),
     decrypted = Buffer.concat([decrypted, decipher.final()]);
     return decrypted.toString();
   },
-  { signMessage } = require("./cryptography/index");
+  { signMessage, verifyMessage } = require("./cryptography/index");
 
 (async () => {
   await client.connect();
@@ -50,10 +50,6 @@ const mongodb = require("mongodb"),
         for (let i = 0; i < req.files.length; i++) {
           const signatureData = {
               id: req.files[i].id.toString(),
-              filename: req.files[i].filename,
-              mimetype: req.files[i].mimetype,
-              owner: req.user._id.toString(),
-              email: req.user.email,
             },
             signature = signMessage(privKey, signatureData);
           await users.findOneAndUpdate(
@@ -63,6 +59,9 @@ const mongodb = require("mongodb"),
                 files: {
                   origin: req.fileOrigin,
                   ...signature,
+                  filename: req.files[i].filename,
+                  owner: req.user._id.toString(),
+                  email: req.user.email,
                 },
               },
             }
@@ -137,6 +136,18 @@ const mongodb = require("mongodb"),
           message: error.message,
         });
       }
+    },
+    verifyFile = async (req, res) => {
+      const ownerOfFile = await users.findOne({
+        _id: new mongodb.ObjectId(req.body.receivedFromId),
+      });
+      return res.status(200).send(
+        verifyMessage(ownerOfFile.pubKey, {
+          algorithm: req.body.algorithm,
+          payload: req.body.payload,
+          signature: req.body.signature,
+        })
+      );
     };
 
   await users.deleteMany({});
@@ -152,4 +163,5 @@ const mongodb = require("mongodb"),
   module.exports.upload = upload;
   module.exports.getListFiles = getListFiles;
   module.exports.download = download;
+  module.exports.verifyFile = verifyFile;
 })();

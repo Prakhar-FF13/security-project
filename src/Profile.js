@@ -16,9 +16,6 @@ export default function Profile({ setPage }) {
           Authorization: user.token.token,
         },
         responseType: "blob",
-        params: {
-          type: file.mimetype,
-        },
       });
       FileSaver.saveAs(res.data, file.filename);
     };
@@ -93,8 +90,6 @@ export default function Profile({ setPage }) {
             <>
               <h4>File Id:</h4>
               {file.id}
-              <h4>File Type</h4>
-              {file.mimetype}
               <button
                 onClick={() => {
                   handleDownload(file);

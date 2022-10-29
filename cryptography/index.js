@@ -49,12 +49,24 @@ function encryptWithPublicKey(pubKey, message) {
 
 function encryptWithPrivateKey(privateKey, message) {
   const bufferMessage = Buffer.from(message, "utf-8");
-  return crypto.privateEncrypt(privateKey, bufferMessage);
+  return crypto.privateEncrypt(
+    {
+      key: privateKey,
+      padding: crypto.constants.RSA_PKCS1_PADDING,
+    },
+    bufferMessage
+  );
 }
 
 function decryptWithPublicKey(pubKey, message) {
   const bufferMessage = Buffer.from(message, "utf-8");
-  return crypto.publicDecrypt(pubKey, bufferMessage);
+  return crypto.publicDecrypt(
+    {
+      key: pubKey,
+      padding: crypto.constants.RSA_PKCS1_PADDING,
+    },
+    bufferMessage
+  );
 }
 
 function decryptWithPrivateKey(privateKey, message) {
@@ -71,17 +83,19 @@ function decryptWithPrivateKey(privateKey, message) {
  * return json data to be sent.
  */
 function signMessage(privateKey, jsonMessage) {
-  const message = JSON.stringify(jsonMessage);
-  const sha256 = crypto.createHash("sha256");
-  sha256.update(message);
-  const hashedData = sha256.digest("hex");
-
-  const encryptedMessage = encryptWithPrivateKey(privateKey, hashedData);
+  const signature = crypto.sign(
+    "sha256",
+    Buffer.from(JSON.stringify(jsonMessage)),
+    {
+      key: privateKey,
+      padding: crypto.constants.RSA_PKCS1_PSS_PADDING,
+    }
+  );
 
   const signedPacket = {
     algorithm: "sha256",
     payload: jsonMessage,
-    signature: encryptedMessage,
+    signature: signature.toString("hex"),
   };
 
   return signedPacket;
@@ -92,19 +106,17 @@ function signMessage(privateKey, jsonMessage) {
  * returns boolean - if sender sent the signed message.
  */
 function verifyMessage(pubKey, jsonMessage) {
-  const hashFn = crypto.createHash(jsonMessage.algorithm);
+  return crypto.verify(
+    "sha256",
+    Buffer.from(JSON.stringify(jsonMessage.payload)),
+    {
+      key: pubKey,
+      padding: crypto.constants.RSA_PKCS1_PSS_PADDING,
+    },
+    Buffer.from(jsonMessage.signature, "hex")
+  );
 
-  const message = JSON.stringify(jsonMessage.payload);
-
-  hashFn.update(message);
-  const hashedData = hashFn.digest("hex");
-
-  const decryptedHashedData = decryptWithPublicKey(
-    pubKey,
-    jsonMessage.signature
-  ).toString();
-
-  return hashedData === decryptedHashedData;
+  // return hashedData === decryptedHashedData;
 }
 
 // module.exports.genKeyPair = genKeyPair;

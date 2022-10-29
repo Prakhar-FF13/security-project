@@ -178,6 +178,14 @@ app.get(
   }
 );
 
+app.post(
+  "/verify_file",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    return await mongoDB.verifyFile(req, res);
+  }
+);
+
 // register user.
 app.post("/register", (req, res) => {
   const saltHash = utils.genPassword(req.body.password),
