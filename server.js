@@ -105,7 +105,6 @@ app.post(
   "/share",
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
-    console.log(req.body);
     await mongoDB.users.updateOne(
       {
         _id: req.user._id,
@@ -130,11 +129,35 @@ app.post(
           received: {
             origin: "received",
             ...req.body,
-            receivedBy: req.user._id,
+            receivedFrom: req.user.email,
+            receivedFromId: req.user._id,
           },
         },
       }
     );
+
+    return res.status(201).send({
+      message: "Shared the file",
+    });
+  }
+);
+
+app.get(
+  "/fetch_shared_files",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    const data = await mongoDB.users.findOne({ _id: req.user._id });
+    return res.status(200).send(data.sent);
+  }
+);
+
+app.get(
+  "/fetch_received_files",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    const data = await mongoDB.users.findOne({ _id: req.user._id });
+
+    return res.status(200).send(data.received);
   }
 );
 

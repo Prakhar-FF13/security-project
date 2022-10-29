@@ -53,6 +53,7 @@ const mongodb = require("mongodb"),
               filename: req.files[i].filename,
               mimetype: req.files[i].mimetype,
               owner: req.user._id.toString(),
+              email: req.user.email,
             },
             signature = signMessage(privKey, signatureData);
           await users.findOneAndUpdate(
