@@ -4,6 +4,9 @@ import { UserContext } from "./App";
 import Navbar from "./Navbar";
 import LoginForm from "./Login";
 import Profile from "./Profile";
+import FilterOptions from "./FilterOptions";
+import BookData from "./Data.json";
+
 
 export default function Container() {
   const user = React.useContext(UserContext);
@@ -14,6 +17,7 @@ export default function Container() {
       {page === 0 && <RegisterForm />}
       {page === 1 && <LoginForm />}
       {page === 2 && <Profile setPage={setPage} />}
+      {page === 3 && <FilterOptions placeholder="Search...." data={BookData} setPage={setPage}/>}
     </>
   );
 }

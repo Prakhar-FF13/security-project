@@ -1,0 +1,37 @@
+[
+    {
+      "name": "Dr. Sandeep Batra",
+      "specialist": "Heart",
+      "Week Days":"Mon-Fri",
+      "Timings": "8:00AM-5:00PM",
+      "Hospital":"Apollo Hospital"
+    },
+    {
+      "name": "Dr. Gagan Gautam",
+      "specialist": "Brain",
+      "Week Days":"Fri-Tue",
+      "Timings": "8:00AM-5:00PM",
+      "Hospital":"Medanta Hospital"
+    },
+    {
+      "name": "Dr. Ashish Sabharwal",
+      "specialist": "Bones",
+      "Week Days":"Wed-Sun",
+      "Timings": "8:00AM-5:00PM",
+      "Hospital":"Sir Ganga Ram Hospital"
+    },
+    {
+      "name": "Dr. Sanjay Sachdeva",
+      "specialist": "ENT",
+      "Week Days":"Mon-Sun",
+      "Timings": "8:00AM-5:00PM",
+      "Hospital":"Jaipur Golden Hospital"
+    },
+    {
+      "name": "Dr. Surbhi Anand",
+      "specialist": "Children",
+      "Week Days":"Sun-Thu",
+      "Timings": "8:00AM-5:00PM",
+      "Hospital":"Max Hospital"
+    }
+]
