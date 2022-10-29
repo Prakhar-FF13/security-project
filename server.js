@@ -101,6 +101,43 @@ app.post(
   }
 );
 
+app.post(
+  "/share",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    console.log(req.body);
+    await mongoDB.users.updateOne(
+      {
+        _id: req.user._id,
+      },
+      {
+        $push: {
+          sent: {
+            origin: "sharedWith",
+            id: req.body.payload.id,
+            sendTo: req.body.sendTo,
+          },
+        },
+      }
+    );
+
+    await mongoDB.users.updateOne(
+      {
+        email: req.body.sendTo,
+      },
+      {
+        $push: {
+          received: {
+            origin: "received",
+            ...req.body,
+            receivedBy: req.user._id,
+          },
+        },
+      }
+    );
+  }
+);
+
 app.get(
   "/fetch_files/:id",
   passport.authenticate("jwt", { session: false }),

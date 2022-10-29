@@ -44,8 +44,19 @@ export default function Profile({ setPage }) {
       }
     };
 
+    const onShare = async (obj) => {
+      obj.sendTo = state.share;
+      await axios.post("/share", obj, {
+        headers: {
+          Authorization: user.token.token,
+        },
+      });
+    };
+
     const onChange = (e) => {
-      setState({ ...state, [e.target.name]: e.target.files });
+      if (e.target.name !== "file")
+        setState({ ...state, [e.target.name]: e.target.value });
+      else setState({ ...state, [e.target.name]: e.target.files });
     };
 
     return (
@@ -68,6 +79,14 @@ export default function Profile({ setPage }) {
             ? "Verified"
             : "Pending verification from admin"}
         </div>
+        <hr />
+        <label htmlFor="share">Share with:</label>
+        <input
+          type="text"
+          name="share"
+          onChange={onChange}
+          value={state.share}
+        />
         {user.files.map((obj) => {
           const file = obj.payload;
           return (
@@ -83,10 +102,16 @@ export default function Profile({ setPage }) {
               >
                 Download
               </button>
+              <button
+                onClick={() => {
+                  onShare(obj);
+                }}
+              >
+                Share
+              </button>
             </>
           );
         })}
-        <hr />
         <form
           onSubmit={(e) => {
             handleUpload(e);
