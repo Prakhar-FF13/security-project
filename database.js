@@ -68,8 +68,11 @@ const mongodb = require("mongodb"),
           );
         }
 
+        const newUserData = await users.findOne({ _id: req.user._id });
+
         return res.send({
           message: "File has been uploaded.",
+          files: newUserData.files,
         });
       } catch (error) {
         console.log(error);

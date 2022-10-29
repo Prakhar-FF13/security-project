@@ -4,8 +4,8 @@ import React, { useContext, useState } from "react";
 import { UserContext } from "./App";
 
 export default function Profile({ setPage }) {
-  const [user] = useContext(UserContext);
-  const [file, setFile] = useState("");
+  const [user, setUser] = useContext(UserContext);
+  const [state, setState] = useState("");
   if (!user || !user.token) {
     setPage(1);
     return <></>;
@@ -26,23 +26,26 @@ export default function Profile({ setPage }) {
     const handleUpload = async (e) => {
       e.preventDefault();
       const formData = new FormData();
-      if (file.file) {
-        for (let i = 0; i < file.file.length; i++) {
-          formData.append("file", file.file[i]);
+      if (state.file) {
+        for (let i = 0; i < state.file.length; i++) {
+          formData.append("file", state.file[i]);
         }
       }
 
-      if (file.file)
-        await axios.post("/upload_files", formData, {
+      if (state.file) {
+        const { data } = await axios.post("/upload_files", formData, {
           headers: {
             "Content-Type": "multipart/form-data",
             Authorization: user.token.token,
           },
         });
+
+        setUser({ ...user, files: data.files });
+      }
     };
 
     const onChange = (e) => {
-      setFile({ ...file, [e.target.name]: e.target.files });
+      setState({ ...state, [e.target.name]: e.target.files });
     };
 
     return (
@@ -58,6 +61,12 @@ export default function Profile({ setPage }) {
         <div>
           <h4>Kind:</h4>
           {user.kind}
+        </div>
+        <div>
+          <h4>Verified:</h4>
+          {user.verified === true
+            ? "Verified"
+            : "Pending verification from admin"}
         </div>
         {user.files.map((obj) => {
           const file = obj.payload;
@@ -77,6 +86,7 @@ export default function Profile({ setPage }) {
             </>
           );
         })}
+        <hr />
         <form
           onSubmit={(e) => {
             handleUpload(e);

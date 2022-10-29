@@ -1,5 +1,4 @@
 const crypto = require("crypto"),
-  sha256 = crypto.createHash("sha256"),
   fs = require("fs");
 
 /**************************************
