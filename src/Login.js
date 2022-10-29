@@ -7,7 +7,7 @@ export default function LoginForm() {
   const [, setUser] = useContext(UserContext);
   const [state, setState] = React.useState({
     type: "user",
-    username: "",
+    email: "",
     password: "",
     kind: "patient",
   });
@@ -19,7 +19,7 @@ export default function LoginForm() {
   const onSubmit = async (e) => {
     e.preventDefault();
     const res = await axios.post("/login", {
-      username: state.username,
+      email: state.email,
       password: state.password,
     });
 
@@ -74,11 +74,11 @@ export default function LoginForm() {
             </select>
           </>
         )}
-        <label htmlFor="username">Username:</label>
+        <label htmlFor="email">Email:</label>
         <input
           type="text"
-          name="username"
-          value={state.username}
+          name="email"
+          value={state.email}
           onChange={onChange}
         />
         <label htmlFor="password">Password:</label>

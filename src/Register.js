@@ -5,7 +5,7 @@ import "./Register.css";
 const RegisterForm = () => {
   const [state, setState] = useState({
     type: "user",
-    username: "",
+    email: "",
     password: "",
     kind: "patient",
   });
@@ -97,13 +97,13 @@ const RegisterForm = () => {
           </>
         )}
 
-        <label htmlFor="username">Username:</label>
+        <label htmlFor="email">Email:</label>
         <input
           type="text"
-          id="username"
-          name="username"
+          id="email"
+          name="email"
           onChange={onChange}
-          value={state.username}
+          value={state.email}
         />
 
         <label htmlFor="password">Password:</label>

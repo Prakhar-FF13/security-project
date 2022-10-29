@@ -129,7 +129,7 @@ app.post("/register", (req, res) => {
 
   mongoDB.users.insertOne(
     {
-      username: req.body.username,
+      email: req.body.email,
       type: req.body.type,
       hash,
       salt,
@@ -155,7 +155,7 @@ app.post("/register", (req, res) => {
 
 // login user.
 app.post("/login", (req, res) => {
-  mongoDB.users.findOne({ username: req.body.username }, function (err, user) {
+  mongoDB.users.findOne({ email: req.body.email }, function (err, user) {
     if (err) {
       return res.status(500).json({
         success: false,

@@ -25,8 +25,8 @@ export default function Profile({ setPage }) {
     return (
       <>
         <div>
-          <h4>Username:</h4>
-          {user.username}
+          <h4>Email:</h4>
+          {user.email}
         </div>
         <div>
           <h4>Type:</h4>
