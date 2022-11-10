@@ -36,7 +36,6 @@ export default function Dashboard({ setPage }) {
       <>
         {user.receivedFrom &&
           user.receivedFrom.map((obj) => {
-            console.log(obj);
             return (
               <>
                 <p>File Id: {obj.payload.id}</p>
