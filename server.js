@@ -6,6 +6,7 @@ const express = require("express"),
   https = require("https"),
   crypto = require("crypto"),
   app = express(),
+  mongodb = require("mongodb"),
   options = {
     key: fs.readFileSync("./cert/key.pem", { encoding: "utf-8" }),
     cert: fs.readFileSync("./cert/certificate.pem", { encoding: "utf-8" }),
@@ -309,6 +310,56 @@ app.post(
     );
     return res.status(200).send(fetchedData.wallet);
   
+  }
+);
+
+app.get("/fetchuserstatus", 
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    const data = await mongoDB.users.find({}).toArray();
+    return res.status(200).send(data);
+});
+
+
+app.post(
+  "/setStatus",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    const data = await mongoDB.users.updateOne(
+      {
+        _id: new mongodb.ObjectId(req.body._id),
+      },
+      {
+        $set: {"verified": true}
+      }
+    );
+    const fetchedData = await mongoDB.users.findOne(
+      {
+        _id: req.user._id,
+      },
+    );
+    return res.status(200).send();
+  }
+);
+
+app.post(
+  "/resetStatus",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    const data = await mongoDB.users.updateOne(
+      {
+        _id: new mongodb.ObjectId(req.body._id),
+      },
+      {
+        $set: {"verified": false}
+      }
+    );
+    const fetchedData = await mongoDB.users.findOne(
+      {
+        _id: req.user._id,
+      },
+    );
+    return res.status(200).send();
   }
 );
 
