@@ -1,45 +1,75 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import axios from "axios";
 import "./Register.css";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import ReCAPTCHA from "react-google-recaptcha";
 
+const SITE_KEY = '6LdT1jcjAAAAANzFxBx1UJGW-6fOjdhP2OfsQfos'; 
 const RegisterForm = () => {
   const [state, setState] = useState({
     type: "user",
-    username: "",
+    email: "",
     password: "",
     kind: "patient",
+    wallet: "1000",
   });
 
+  const [recaptchaValue,  setRecaptchaValue] = useState('');
+  const captchaRef = useRef();
+
   const onChange = (e) => {
-    if (e.target.name !== "file")
+    if (e.target.name === "type")
+      setState({
+        ...state,
+        [e.target.name]: e.target.value,
+        kind: e.target.value === "user" ? "patient" : "hospital",
+      });
+    else if (e.target.name !== "file")
       setState({ ...state, [e.target.name]: e.target.value });
     else setState({ ...state, [e.target.name]: e.target.files });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const formData = new FormData();
-      if (state.file)
-        for (let i = 0; i < state.file.length; i++) {
-          formData.append("file", state.file[i]);
-        }
-
-      const res = await axios.post("/register", {
-        ...state,
-      });
-
-      if (state.file)
-        await axios.post("/upload_files", formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: res.data.token,
-          },
+    captchaRef.current.reset();
+    if(isCaptchaChecked()){
+      try {
+        const formData = new FormData();
+        if (state.file)
+          for (let i = 0; i < state.file.length; i++) {
+            formData.append("file", state.file[i]);
+          }
+  
+        const res = await axios.post("/register", {
+          ...state,recaptchaValue,
         });
-    } catch (e) {
-      console.log(e);
+  
+        if (state.file)
+          await axios.post("/upload_files", formData, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+              Authorization: res.data.token,
+            },
+          });
+  
+        toast.success("Registration Successful!!", {position:"top-center"});
+      } catch (e) {
+        console.log(e);
+      }
+    }
+    else{
+      toast.warning("Select captcha to continue!!", {position:"top-center"});
     }
   };
+
+  const onCaptchaChange = value => {
+    setRecaptchaValue(value);
+  }
+
+  function isCaptchaChecked() {
+    return grecaptcha && grecaptcha.getResponse().length !== 0;
+  }
 
   return (
     <>
@@ -54,7 +84,7 @@ const RegisterForm = () => {
         id="regForm"
       >
         <label htmlFor="type">Type</label>
-        <select id="type" name="type" onChange={onChange} value={state.value}>
+        <select id="type" name="type" onChange={onChange} value={state.type}>
           <option value="user">User</option>
           <option value="organisation">Organisation</option>
         </select>
@@ -66,7 +96,7 @@ const RegisterForm = () => {
               id="kind"
               name="kind"
               onChange={onChange}
-              value={state.value}
+              value={state.kind}
             >
               <option value="patient">Patient</option>
               <option value="healthCareProfessional">
@@ -82,7 +112,7 @@ const RegisterForm = () => {
               id="kind"
               name="kind"
               onChange={onChange}
-              value={state.value}
+              value={state.kind}
             >
               <option value="hospital">Hospital</option>
               <option value="pharmacy">Pharmacy</option>
@@ -91,13 +121,14 @@ const RegisterForm = () => {
           </>
         )}
 
-        <label htmlFor="username">Username:</label>
+        <label htmlFor="email">Email:</label>
         <input
-          type="text"
-          id="username"
-          name="username"
+          type="email"
+          id="email"
+          name="email"
           onChange={onChange}
-          value={state.username}
+          value={state.email}
+          required
         />
 
         <label htmlFor="password">Password:</label>
@@ -107,6 +138,7 @@ const RegisterForm = () => {
           name="password"
           onChange={onChange}
           value={state.password}
+          required
         />
 
         {state && state.type === "organisation" ? (
@@ -121,7 +153,16 @@ const RegisterForm = () => {
             />
           </>
         ) : null}
-        <input type="submit" value="submit" />
+
+        <div class="g-recaptcha" data-sitekey={SITE_KEY} onChange={onCaptchaChange}></div>
+        {/* <ReCAPTCHA 
+          sitekey={SITE_KEY}
+          onChange={onCaptchaChange}
+          ref={captchaRef}
+          required
+        /> */}
+        <input type="submit" value="submit" id="submitBtn" disabled/>
+        <ToastContainer />
       </form>
     </>
   );

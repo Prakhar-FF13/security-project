@@ -2,12 +2,14 @@ import axios from "axios";
 import React, { useContext } from "react";
 import "./Login.css";
 import { UserContext } from "./App";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function LoginForm() {
   const [, setUser] = useContext(UserContext);
   const [state, setState] = React.useState({
     type: "user",
-    username: "",
+    email: "",
     password: "",
     kind: "patient",
   });
@@ -19,7 +21,7 @@ export default function LoginForm() {
   const onSubmit = async (e) => {
     e.preventDefault();
     const res = await axios.post("/login", {
-      username: state.username,
+      email: state.email,
       password: state.password,
     });
 
@@ -32,6 +34,8 @@ export default function LoginForm() {
       token: res.data.token,
       ...res.data.user,
     });
+
+    toast.success("Login Successful!!", {position:"top-center"});
   };
 
   return (
@@ -74,12 +78,13 @@ export default function LoginForm() {
             </select>
           </>
         )}
-        <label htmlFor="username">Username:</label>
+        <label htmlFor="email">Email:</label>
         <input
-          type="text"
-          name="username"
-          value={state.username}
+          type="email"
+          name="email"
+          value={state.email}
           onChange={onChange}
+          required
         />
         <label htmlFor="password">Password:</label>
         <input
@@ -88,8 +93,10 @@ export default function LoginForm() {
           name="password"
           onChange={onChange}
           value={state.password}
+          required
         />
         <input type="submit" value="submit" />
+        <ToastContainer />
       </form>
     </>
   );
